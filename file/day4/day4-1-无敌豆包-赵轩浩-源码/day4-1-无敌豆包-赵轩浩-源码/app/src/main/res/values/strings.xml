@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">简易记账本</string>
+    <string name="tab_records">账单</string>
+    <string name="tab_statistics">统计</string>
+    <string name="tab_budget">预算</string>
+    <string name="add_record">添加账单</string>
+    <string name="edit_record">编辑账单</string>
+    <string name="income">收入</string>
+    <string name="expense">支出</string>
+    <string name="save">保存</string>
+    <string name="cancel">取消</string>
+    <string name="delete">删除</string>
+    <string name="confirm">确认</string>
+    <string name="amount">金额</string>
+    <string name="note">备注</string>
+    <string name="date">日期</string>
+    <string name="category">分类</string>
+    <string name="search">搜索</string>
+    <string name="export">导出</string>
+    <string name="import_title">导入</string>
+    <string name="overall_budget">总预算</string>
+    <string name="set_budget">设置预算</string>
+    <string name="remaining">剩余</string>
+    <string name="over_budget">已超预算</string>
+    <string name="no_records">暂无账单记录</string>
+    <string name="total_income">总收入</string>
+    <string name="total_expense">总支出</string>
+    <string name="balance">结余</string>
+    <string name="this_month">本月</string>
+    <string name="last_month">上月</string>
+    <string name="custom_range">自定义</string>
+    <string name="filter">筛选</string>
+    <string name="all">全部</string>
+    <string name="confirm_delete">确认删除这条记录吗？</string>
+</resources>
