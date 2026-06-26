@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew assembleDebug)",
+      "Bash(./gradlew --version)",
+      "Bash(./gradlew :app:kaptDebugKotlin --stacktrace)"
+    ]
+  }
+}
