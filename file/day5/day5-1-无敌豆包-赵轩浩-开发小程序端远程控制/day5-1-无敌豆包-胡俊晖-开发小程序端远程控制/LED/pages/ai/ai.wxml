@@ -1,0 +1,186 @@
+<!-- pages/ai-assistant/ai-assistant.wxml -->
+<view class="ai-container">
+  <!-- 顶部导航 -->
+  <view class="ai-header">
+    <view class="header-left">
+      <text class="ai-title">🤖 AI智能助手</text>
+      <text class="ai-subtitle">Powered by 小智</text>
+    </view>
+    <view class="header-right">
+      <van-icon name="replay" size="20px" color="#fff" bindtap="clearHistory" />
+    </view>
+  </view>
+
+  <!-- 搜索模式切换 -->
+  <view class="mode-switcher">
+    <view 
+      class="mode-tab {{ currentMode === 'smart' ? 'active' : '' }}"
+      bindtap="switchMode" 
+      data-mode="smart"
+    >
+      <text class="mode-icon">⚡</text>
+      <text class="mode-name">智能搜索</text>
+      <text class="mode-desc">快速问答</text>
+    </view>
+    <view 
+      class="mode-tab {{ currentMode === 'deep' ? 'active' : '' }}"
+      bindtap="switchMode" 
+      data-mode="deep"
+    >
+      <text class="mode-icon">🔍</text>
+      <text class="mode-name">深度搜索</text>
+      <text class="mode-desc">知识库精准匹配</text>
+    </view>
+  </view>
+
+  <!-- 模式状态提示 -->
+  <view class="mode-status">
+    <text class="status-text">
+      {{ currentMode === 'smart' ? '💡 智能搜索模式：快速响应，适合日常咨询' : '📚 深度搜索模式：基于知识库精准匹配，适合专业问题' }}
+    </text>
+  </view>
+
+  <!-- 设备类型选择（仅深度搜索模式显示） -->
+  <view class="device-selector" wx:if="{{ currentMode === 'deep' }}">
+    <view class="device-label">
+      <text>📱 设备筛选：</text>
+    </view>
+    <scroll-view class="device-scroll" scroll-x>
+      <view 
+        class="device-chip {{ selectedDevice === '' ? 'active' : '' }}"
+        bindtap="selectDevice" 
+        data-device=""
+      >
+        全部设备
+      </view>
+      <view 
+        class="device-chip {{ selectedDevice === item ? 'active' : '' }}"
+        wx:for="{{ deviceTypes }}" 
+        wx:key="index"
+        bindtap="selectDevice" 
+        data-device="{{ item }}"
+      >
+        {{ item }}
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 对话列表 -->
+  <scroll-view 
+    class="chat-list" 
+    scroll-y 
+    scroll-into-view="{{ scrollToView }}"
+    scroll-with-animation
+  >
+    <!-- 欢迎消息 -->
+    <view class="welcome-message" wx:if="{{ messages.length === 0 }}">
+      <view class="welcome-icon">👋</view>
+      <view class="welcome-title">
+        {{ currentMode === 'smart' ? '智能搜索模式' : '深度搜索模式' }}
+      </view>
+      <view class="welcome-desc">
+        {{ currentMode === 'smart' ? '快速回答您的日常问题' : '基于智能家居知识库精准回答' }}
+      </view>
+      <view class="welcome-tips">
+        <text class="tip-item">💡 试试问我：如何连接智能灯泡？</text>
+        <text class="tip-item">🔧 设备故障排查</text>
+        <text class="tip-item">📖 智能家居使用指南</text>
+      </view>
+    </view>
+
+    <!-- 消息列表 -->
+    <view 
+      class="message-wrapper" 
+      wx:for="{{ messages }}" 
+      wx:key="id"
+      id="msg-{{item.id}}"
+    >
+      <view class="message {{ item.role === 'user' ? 'user' : 'assistant' }}">
+        <view class="message-avatar">
+          <image 
+            wx:if="{{ item.role === 'user' }}" 
+            src="{{ userInfo.avatar || '/images/default_avatar.png' }}" 
+            mode="aspectFill"
+          />
+          <text wx:else>🤖</text>
+        </view>
+        <view class="message-content-wrapper">
+          <view class="message-content" bindlongpress="copyMessage" data-content="{{ item.content }}">
+            <text>{{ item.content }}</text>
+          </view>
+          
+          <!-- 深度搜索特有的信息来源 -->
+          <view class="message-meta" wx:if="{{ item.mode === 'deep' && item.sources }}">
+            <view class="meta-item">
+              <text class="meta-icon">📚</text>
+              <text class="meta-text">匹配到 {{ item.matchedCount || 0 }} 条相关知识</text>
+            </view>
+            <view class="meta-item" wx:if="{{ item.bestMatch }}">
+              <text class="meta-icon">🎯</text>
+              <text class="meta-text">最佳匹配：{{ item.bestMatch }}</text>
+            </view>
+            <view class="meta-item" wx:if="{{ item.processingTime }}">
+              <text class="meta-icon">⏱️</text>
+              <text class="meta-text">处理耗时：{{ item.processingTime }}ms</text>
+            </view>
+            <!-- 展开来源 -->
+            <view class="sources-toggle" bindtap="toggleSources" data-id="{{ item.id }}">
+              <text>{{ item.showSources ? '收起来源 ▲' : '查看来源 ▼' }}</text>
+            </view>
+            <view class="sources-list" wx:if="{{ item.showSources && item.sources.length }}">
+              <view class="source-item" wx:for="{{ item.sources }}" wx:key="index">
+                <text class="source-index">{{ index + 1 }}.</text>
+                <text class="source-text">{{ item }}</text>
+              </view>
+            </view>
+          </view>
+          
+          <!-- 智能搜索的标签 -->
+          <view class="message-tag" wx:if="{{ item.mode === 'smart' && item.role === 'assistant' }}">
+            <text class="tag-smart">⚡ 智能回答</text>
+          </view>
+          <view class="message-tag" wx:if="{{ item.mode === 'deep' && item.role === 'assistant' }}">
+            <text class="tag-deep">🔍 深度搜索</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 打字指示器 -->
+    <view class="typing-indicator" wx:if="{{ isTyping }}">
+      <view class="typing-avatar">🤖</view>
+      <view class="typing-dots">
+        <view class="dot"></view>
+        <view class="dot"></view>
+        <view class="dot"></view>
+      </view>
+    </view>
+
+    <view style="height:20rpx;"></view>
+  </scroll-view>
+
+  <!-- 输入区域 -->
+  <view class="input-area">
+    <view class="input-wrapper">
+      <view class="input-box">
+        <input 
+          class="ai-input"
+          type="text"
+          value="{{ inputMessage }}"
+          bindinput="onInput"
+          placeholder="{{ currentMode === 'smart' ? '输入你想问的问题...' : '输入需要深度搜索的问题...' }}"
+          placeholder-class="input-placeholder"
+          confirm-type="send"
+          bindconfirm="sendMessage"
+        />
+      </view>
+      <button 
+        class="ai-send-btn {{ currentMode === 'deep' ? 'deep-mode' : '' }}" 
+        bindtap="sendMessage"
+        disabled="{{ isTyping || !inputMessage }}"
+      >
+        {{ currentMode === 'smart' ? '发送' : '深度搜索' }}
+      </button>
+    </view>
+  </view>
+</view>

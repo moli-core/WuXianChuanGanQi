@@ -1,0 +1,151 @@
+<view class="home-container">
+  <!-- 顶部欢迎区域 -->
+  <view class="header-section">
+    <view class="header-top">
+      <view class="greeting-area">
+        <text class="greeting-text">🌞 你好，{{ userName || '用户' }}</text>
+        <text class="greeting-sub">欢迎来到智能家居控制中心</text>
+      </view>
+      <view class="header-time">{{ currentTime }}</view>
+    </view>
+  </view>
+
+  <!-- 语音控制卡片 -->
+  <view class="card voice-card">
+    <view class="card-header">
+      <view class="card-title">
+        <text class="card-icon">🎤</text>
+        <text>语音控制</text>
+      </view>
+      <text class="card-subtitle">长按按钮说话</text>
+    </view>
+    <view class="voice-btn-wrapper">
+      <van-button 
+        type="warning" 
+        icon="records" 
+        size="large"
+        bindtouchstart="startRecord"
+        bindtouchend="stopRecord"
+        bindtouchcancel="stopRecord"
+        class="voice-btn"
+      >
+        长按说话控制灯光
+      </van-button>
+    </view>
+  </view>
+
+  <!-- 文字输入卡片 -->
+  <view class="card input-card">
+    <view class="card-header">
+      <view class="card-title">
+        <text class="card-icon">💬</text>
+        <text>文字指令</text>
+      </view>
+      <text class="card-subtitle">输入或发送指令</text>
+    </view>
+    <view class="input-wrapper">
+      <input 
+        class="text-input"
+        type="text"
+        value="{{ inputText }}"
+        bindinput="onInputChange"
+        placeholder="输入指令：开灯 / 关灯 / 调亮..."
+        placeholder-class="input-placeholder"
+        confirm-type="send"
+        bindconfirm="sendTextCommand"
+      />
+      <button 
+        class="send-btn"
+        bindtap="sendTextCommand"
+      >
+        发送指令
+      </button>
+    </view>
+  </view>
+
+  <!-- 设备状态卡片 -->
+  <view class="card status-card">
+    <view class="card-header">
+      <view class="card-title">
+        <text class="card-icon">📊</text>
+        <text>设备状态</text>
+      </view>
+    </view>
+    <view class="status-grid">
+      <view class="status-item">
+        <text class="status-label">设备状态</text>
+        <text class="status-value {{ device_status === '在线' ? 'online' : 'offline' }}">
+          {{ device_status || '在线' }}
+        </text>
+      </view>
+      <view class="status-item">
+        <text class="status-label">LED状态</text>
+        <text class="status-value {{ ledOnOff === '开启' ? 'on' : 'off' }}">
+          {{ ledOnOff === '开启' ? '💡 已开启' : '🔌 已关闭' }}
+        </text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 灯光控制卡片 -->
+  <view class="card control-card">
+    <view class="card-header">
+      <view class="card-title">
+        <text class="card-icon">💡</text>
+        <text>灯光控制</text>
+      </view>
+    </view>
+    
+    <!-- 开关控制 -->
+    <view class="control-row">
+      <text class="control-label">灯光开关</text>
+      <van-switch 
+        checked="{{ checked }}" 
+        size="28px" 
+        bind:change="onChange"
+        active-color="#07c160"
+      />
+    </view>
+
+    <!-- 按钮组 -->
+    <view class="btn-group">
+      <button class="btn-on" bindtap="turnLightOn">
+        <text>💡 开灯</text>
+      </button>
+      <button class="btn-off" bindtap="turnLightOff">
+        <text>🔌 关灯</text>
+      </button>
+    </view>
+
+    <!-- 点击图片切换 -->
+    <view class="light-icon-wrapper" bindtap="onChange2">
+      <image src="{{ ledicon }}" class="light-icon" mode="aspectFit"></image>
+      <text class="light-tip">点击图标切换灯光</text>
+    </view>
+  </view>
+
+  <!-- 温湿度卡片 -->
+  <view class="card sensor-card">
+    <view class="card-header">
+      <view class="card-title">
+        <text class="card-icon">🌡️</text>
+        <text>环境监测</text>
+      </view>
+    </view>
+    <view class="sensor-grid">
+      <view class="sensor-item">
+        <text class="sensor-icon">🌡️</text>
+        <text class="sensor-value">28°C</text>
+        <text class="sensor-label">温度</text>
+      </view>
+      <view class="sensor-item">
+        <text class="sensor-icon">💧</text>
+        <text class="sensor-value">60%</text>
+        <text class="sensor-label">湿度</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部安全区 -->
+  <view style="height:20rpx;"></view>
+</view>

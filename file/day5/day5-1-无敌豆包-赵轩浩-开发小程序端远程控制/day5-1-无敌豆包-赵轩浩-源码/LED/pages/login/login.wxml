@@ -1,0 +1,61 @@
+<view class="login-container">
+  <!-- 顶部装饰 -->
+  <view class="login-header">
+    <image class="logo" src="/images/logo.png" mode="aspectFit"></image>
+    <text class="app-name">智能家居</text>
+    <text class="app-slogan">让生活更智能</text>
+  </view>
+
+  <!-- 登录表单 -->
+  <view class="login-form">
+    <view class="form-item">
+      <van-icon name="user-o" size="20px" color="#999" />
+      <input 
+        class="form-input"
+        type="text"
+        placeholder="请输入手机号"
+        value="{{ phone }}"
+        bindinput="onPhoneInput"
+        maxlength="11"
+      />
+    </view>
+    
+    <view class="form-item">
+      <van-icon name="lock" size="20px" color="#999" />
+      <input 
+        class="form-input"
+        type="password"
+        placeholder="请输入密码"
+        value="{{ password }}"
+        bindinput="onPasswordInput"
+      />
+    </view>
+
+    <van-button 
+      type="primary" 
+      size="large" 
+      bindtap="handleLogin"
+      loading="{{ isLoading }}"
+      round
+      class="login-btn"
+    >
+      登 录
+    </van-button>
+
+    <view class="login-footer">
+      <text class="forgot-pwd">忘记密码？</text>
+      <text class="register">注册新账号</text>
+    </view>
+  </view>
+
+  <!-- 其他登录方式 -->
+  <view class="other-login">
+    <view class="divider">
+      <text>其他登录方式</text>
+    </view>
+    <view class="social-login">
+      <van-icon name="wechat" size="40px" color="#07c160" />
+      <van-icon name="alipay" size="40px" color="#1677ff" />
+    </view>
+  </view>
+</view>

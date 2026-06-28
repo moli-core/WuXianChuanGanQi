@@ -1,0 +1,48 @@
+<!--pages/weather/weather.wxml-->
+<view class="weather-container">
+  <!-- 当前天气 -->
+  <view class="weather-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+    <view class="weather-top">
+      <text class="weather-city">{{ city }}</text>
+      <text class="weather-date">{{ date }}</text>
+    </view>
+    <view class="weather-middle">
+      <text class="weather-temp">{{ temperature }}°</text>
+      <text class="weather-desc">{{ description }}</text>
+    </view>
+    <view class="weather-bottom">
+      <view class="weather-info">
+        <text>💧 {{ humidity }}%</text>
+        <text>💨 {{ windSpeed }}级</text>
+        <text>👀 {{ visibility }}km</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 未来天气 -->
+  <view class="forecast-card">
+    <text class="forecast-title">未来7天天气预报</text>
+    <view class="forecast-list">
+      <view class="forecast-item" wx:for="{{ forecast }}" wx:key="date">
+        <text class="forecast-day">{{ item.day }}</text>
+        <text class="forecast-icon">{{ item.icon }}</text>
+        <text class="forecast-temp">{{ item.temp }}°</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 生活指数 -->
+  <view class="card">
+    <view class="card-title">
+      <van-icon name="info-o" size="20px" color="#1989fa" />
+      <text>生活指数</text>
+    </view>
+    <view class="index-grid">
+      <view class="index-item" wx:for="{{ lifeIndex }}" wx:key="name">
+        <text class="index-name">{{ item.name }}</text>
+        <text class="index-value">{{ item.value }}</text>
+        <text class="index-desc">{{ item.desc }}</text>
+      </view>
+    </view>
+  </view>
+</view>

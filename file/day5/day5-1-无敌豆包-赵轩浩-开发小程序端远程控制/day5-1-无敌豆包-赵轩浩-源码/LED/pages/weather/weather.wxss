@@ -1,0 +1,155 @@
+/* pages/weather/weather.wxss */
+.weather-container {
+  min-height: 100vh;
+  background: #f5f6fa;
+  padding: 30rpx;
+}
+
+.weather-card {
+  border-radius: 30rpx;
+  padding: 50rpx 40rpx;
+  color: #fff;
+  box-shadow: 0 10rpx 40rpx rgba(79, 172, 254, 0.3);
+}
+
+.weather-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.weather-city {
+  font-size: 40rpx;
+  font-weight: bold;
+}
+
+.weather-date {
+  font-size: 24rpx;
+  opacity: 0.9;
+}
+
+.weather-middle {
+  display: flex;
+  align-items: baseline;
+  gap: 20rpx;
+  margin: 30rpx 0;
+}
+
+.weather-temp {
+  font-size: 100rpx;
+  font-weight: bold;
+}
+
+.weather-desc {
+  font-size: 32rpx;
+  opacity: 0.9;
+}
+
+.weather-bottom {
+  border-top: 2rpx solid rgba(255,255,255,0.3);
+  padding-top: 30rpx;
+  margin-top: 20rpx;
+}
+
+.weather-info {
+  display: flex;
+  justify-content: space-around;
+  font-size: 26rpx;
+}
+
+.forecast-card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin: 30rpx 0;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.05);
+}
+
+.forecast-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 20rpx;
+}
+
+.forecast-list {
+  display: flex;
+  gap: 20rpx;
+  overflow-x: auto;
+}
+
+.forecast-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10rpx;
+  min-width: 100rpx;
+  padding: 20rpx 10rpx;
+  background: #f8f9fc;
+  border-radius: 16rpx;
+}
+
+.forecast-day {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.forecast-icon {
+  font-size: 40rpx;
+}
+
+.forecast-temp {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.05);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.index-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20rpx;
+}
+
+.index-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+  padding: 20rpx 10rpx;
+  background: #f8f9fc;
+  border-radius: 16rpx;
+}
+
+.index-name {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.index-value {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.index-desc {
+  font-size: 20rpx;
+  color: #999;
+}

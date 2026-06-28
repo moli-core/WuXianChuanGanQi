@@ -1,0 +1,86 @@
+<view class="profile-container">
+  <!-- 用户信息卡片 -->
+  <view class="profile-header">
+    <view class="user-card">
+      <image class="avatar" src="{{ userInfo.avatar || '/images/default_avatar.png' }}" mode="aspectFill"></image>
+      <view class="user-info">
+        <text class="username">{{ userInfo.nickname || '用户' }}</text>
+        <text class="user-phone">{{ userInfo.phone || '未绑定手机号' }}</text>
+      </view>
+      <view class="edit-btn" bindtap="editProfile">
+        <text>编辑</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 统计数据 -->
+  <view class="stats-grid">
+    <view class="stat-item">
+      <text class="stat-number">{{ stats.devices }}</text>
+      <text class="stat-label">设备数</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-number">{{ stats.scenes }}</text>
+      <text class="stat-label">场景</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-number">{{ stats.logs }}</text>
+      <text class="stat-label">操作记录</text>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu-list">
+    <view class="menu-item" bindtap="navigateTo" data-url="/pages/device/device">
+      <view class="menu-left">
+        <view class="menu-icon" style="background:#e8f4fd;">
+          <van-icon name="setting-o" size="22px" color="#1989fa" />
+        </view>
+        <text class="menu-title">设备管理</text>
+      </view>
+      <van-icon name="arrow" size="16px" color="#ccc" />
+    </view>
+
+    <view class="menu-item" bindtap="navigateTo" data-url="/pages/scene/scene">
+      <view class="menu-left">
+        <view class="menu-icon" style="background:#f0f8ee;">
+          <van-icon name="cluster-o" size="22px" color="#07c160" />
+        </view>
+        <text class="menu-title">场景设置</text>
+      </view>
+      <van-icon name="arrow" size="16px" color="#ccc" />
+    </view>
+
+    <view class="menu-item" bindtap="navigateTo" data-url="/pages/history/history">
+      <view class="menu-left">
+        <view class="menu-icon" style="background:#fef6e8;">
+          <van-icon name="clock-o" size="22px" color="#ff976a" />
+        </view>
+        <text class="menu-title">操作日志</text>
+      </view>
+      <van-icon name="arrow" size="16px" color="#ccc" />
+    </view>
+
+    <view class="menu-item" bindtap="navigateTo" data-url="/pages/about/about">
+      <view class="menu-left">
+        <view class="menu-icon" style="background:#f5f0ff;">
+          <van-icon name="info-o" size="22px" color="#9b59b6" />
+        </view>
+        <text class="menu-title">关于我们</text>
+      </view>
+      <van-icon name="arrow" size="16px" color="#ccc" />
+    </view>
+  </view>
+
+  <!-- 版本信息 -->
+  <view class="version-info">
+    <text>版本 v1.0.0</text>
+  </view>
+
+  <!-- 退出登录按钮 -->
+  <view class="logout-wrapper">
+    <button class="logout-btn" bindtap="logout">
+      退出登录
+    </button>
+  </view>
+</view>

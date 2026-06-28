@@ -1,0 +1,39 @@
+spring:
+  ai:
+    vectorstore:
+      redis:
+        initialize-schema: true  # 让应用自动创建索引
+        index-name: my-rag-index # 自定义索引名
+    dashscope:
+      api-key: sk-ws-H.RYRYMPP.ZVko.MEQCIAY59FWhznfWWHy7cbqRpzDaXaR-cnytmeHBne9GVCYIAiA3iOYL_ngvW2TVktwPEvg5d0a_aLsN1IrJ1LvFZ5Kzcw
+      embedding:
+        options:
+          model: text-embedding-v3 # 使用百炼的向量模型
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+      # 文件上传临时目录（可选）
+      location: D:/tmp/uploads
+      # 文件大小阈值，超过此值才写入磁盘
+      file-size-threshold: 2KB
+server:
+  port: 8080
+
+# 巴法云MQTT配置
+# 巴法云MQTT配置
+mqtt:
+  broker: tcp://mqtt.bemfa.com:9501
+  uid: 30bb2e98359643078a1f1f35f3e579d5
+  pwd: bemfa
+  topic: led002
+
+xfyun:
+  app-id: b3730b12
+  api-key: 09425824b3a0487579e56fbe9eaba973
+  api-secret: MGJlY2RmOGRmZWRiZmM1YjAzYjQwMzQw
+  audio:
+    sample-rate: 16000  # 16kHz
+    format: "pcm"       # PCM格式
+
+
