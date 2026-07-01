@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>AIOT 无线传感网后端</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: #0a0f17; color: #fff;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; text-align: center;
+        }
+        .box { padding: 40px; }
+        h1 { font-size: 28px; margin-bottom: 8px; }
+        p.desc { color: #888; margin-bottom: 32px; font-size: 14px; }
+        a.card {
+            display: block; width: 300px; margin: 12px auto;
+            padding: 18px 24px; border-radius: 12px;
+            text-decoration: none; color: #fff; font-size: 16px;
+            transition: transform .15s;
+        }
+        a.card:hover { transform: scale(1.03); }
+        .card1 { background: #0f3460; }
+        .card2 { background: #16213e; }
+        .card3 { background: #1a1a2e; }
+        .card span { color: #88ccff; font-size: 12px; display: block; margin-top: 4px; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h1>AIOT 无线传感网后端</h1>
+    <p class="desc">Spring Boot · DeepSeek · 华为IoT · 讯飞AST</p>
+
+    <a class="card card1" href="/swagger-ui.html">
+        📋 Swagger 接口文档
+        <span>45+ 个 API 端点，在线调试</span>
+    </a>
+    <a class="card card2" href="/3d">
+        🏠 数字孪生 3D 可视化
+        <span>2室1厅1卫实时IoT设备状态</span>
+    </a>
+    <a class="card card3" href="/actuator/health">
+        ❤️ 健康检查
+        <span>服务运行状态</span>
+    </a>
+</div>
+</body>
+</html>

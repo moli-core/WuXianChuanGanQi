@@ -1,0 +1,109 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: wireless-backend
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  # 本地开发排除 Nacos 自动配置
+  autoconfigure:
+    exclude:
+      - com.alibaba.cloud.nacos.discovery.NacosDiscoveryClientAutoConfiguration
+      - com.alibaba.cloud.nacos.discovery.reactive.NacosReactiveDiscoveryClientAutoConfiguration
+      - com.alibaba.cloud.nacos.NacosServiceAutoConfiguration
+      - com.alibaba.cloud.nacos.discovery.NacosDiscoveryClientConfiguration
+      - com.alibaba.cloud.nacos.endpoint.NacosEndpointAutoConfiguration
+
+  # 禁用 Nacos
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/wireless_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: ${MYSQL_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 300000
+      max-lifetime: 1200000
+
+  # SpringDoc Swagger
+  springdoc:
+    api-docs:
+      path: /v3/api-docs
+    swagger-ui:
+      path: /swagger-ui.html
+
+# MyBatis
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.wireless.model.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# ===== 华为 IoTDA 云平台 (与硬件统一) =====
+huawei:
+  iot:
+    region: ${HW_REGION:cn-south-1}
+    iam-endpoint: ${HW_IAM_ENDPOINT:https://iam.cn-south-1.myhuaweicloud.com}
+    iotda-endpoint: ${HW_IOTDA_ENDPOINT:https://d1aaeb8e71.st1.iotda-app.cn-south-1.myhuaweicloud.com:443}
+    project-id: ${HW_PROJECT_ID:}
+    instance-id: ${HW_INSTANCE_ID:}
+    device-id: ${HW_DEVICE_ID:6a3e4b21c00ccb6d4b6000c5_Esp32_Device}
+    service-id: ${HW_SERVICE_ID:Esp32}
+    auth-username: ${HW_AUTH_USERNAME:WSNuser}
+    auth-password: ${HW_AUTH_PASSWORD:DzMQqz!Io2AxqsMZ!D}
+    auth-domain: ${HW_AUTH_DOMAIN:hid_7iskcnx2h6k5gbi}
+
+# ===== AI 配置 (DeepSeek — 与硬件统一) =====
+ai:
+  provider: deepseek
+  api-key: ${DEEPSEEK_API_KEY:your-deepseek-key}
+  base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
+  model: ${DEEPSEEK_MODEL:deepseek-chat}
+
+# ===== 讯飞 AST 语音识别 (硬件已验证的账号) =====
+xfyun:
+  ast:
+    app-id: ${XFYUN_APP_ID:your-xfyun-appid}
+    api-key: ${XFYUN_API_KEY:your-xfyun-key}
+    api-secret: ${XFYUN_API_SECRET:your-xfyun-secret}
+    endpoint: ${XFYUN_AST_ENDPOINT:wss://office-api-ast-dx.iflyaisol.com/ast/communicate/v1}
+
+# 天气 API 配置 (心知天气)
+weather:
+  api-key: ${WEATHER_API_KEY:your-weather-key}
+  api-url: https://api.seniverse.com/v3/weather/now.json
+  city: ${WEATHER_CITY:beijing}
+
+# 地图 API 配置 (高德地图)
+map:
+  api-key: ${MAP_API_KEY:your-amap-key}
+  api-url: https://restapi.amap.com/v3
+
+# TTS 语音合成配置 (待申请讯飞语音合成服务)
+tts:
+  provider: xunfei
+  api-key: ${TTS_API_KEY:}
+  api-url: ${TTS_API_URL:}
+
+# 设备联动阈值
+device:
+  linkage:
+    temp-high-threshold: 35.0    # 温度高于 35°C 自动开风扇
+    smoke-alert-threshold: 500.0 # 烟雾浓度 > 500ppm 触发蜂鸣器
+
+# 日志
+logging:
+  level:
+    root: INFO
+    com.wireless: DEBUG
