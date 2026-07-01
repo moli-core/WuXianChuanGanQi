@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wireless.mapper.OperationLogMapper">
+
+    <resultMap id="BaseResultMap" type="com.wireless.model.entity.OperationLog">
+        <id column="id" property="id"/>
+        <result column="device_code" property="deviceCode"/>
+        <result column="device_name" property="deviceName"/>
+        <result column="action" property="action"/>
+        <result column="source" property="source"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.wireless.model.entity.OperationLog"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO operation_log (device_code, device_name, action, source)
+        VALUES (#{deviceCode}, #{deviceName}, #{action}, #{source})
+    </insert>
+
+    <select id="selectByTimeRange" resultMap="BaseResultMap">
+        SELECT * FROM operation_log
+        WHERE create_time BETWEEN #{startTime} AND #{endTime}
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByDeviceCode" resultMap="BaseResultMap">
+        SELECT * FROM operation_log
+        WHERE device_code = #{deviceCode}
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="countByDeviceCode" resultType="int">
+        SELECT COUNT(*)
+        FROM operation_log
+        WHERE device_code = #{deviceCode}
+          AND create_time BETWEEN #{startTime} AND #{endTime}
+    </select>
+
+</mapper>

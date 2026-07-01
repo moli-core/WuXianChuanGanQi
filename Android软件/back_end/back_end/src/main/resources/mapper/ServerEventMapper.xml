@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wireless.mapper.ServerEventMapper">
+
+    <resultMap id="BaseResultMap" type="com.wireless.model.entity.ServerEvent">
+        <id column="id" property="id"/>
+        <result column="server_id" property="serverId"/>
+        <result column="event_type" property="eventType"/>
+        <result column="device_code" property="deviceCode"/>
+        <result column="content" property="content"/>
+        <result column="raw_data" property="rawData"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO server_event (server_id, event_type, device_code, content, raw_data)
+        VALUES (#{serverId}, #{eventType}, #{deviceCode}, #{content}, #{rawData})
+    </insert>
+
+    <select id="selectByType" resultMap="BaseResultMap">
+        SELECT * FROM server_event
+        WHERE event_type=#{eventType}
+        ORDER BY create_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectByDevice" resultMap="BaseResultMap">
+        SELECT * FROM server_event
+        WHERE device_code=#{deviceCode}
+        ORDER BY create_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 事件趋势: 每天每种事件类型数量 -->
+    <select id="countTrendByDay" resultType="java.util.HashMap">
+        SELECT DATE(create_time) as date, event_type as eventType, COUNT(*) as count
+        FROM server_event
+        WHERE create_time >= DATE_SUB(NOW(), INTERVAL #{days} DAY)
+        GROUP BY DATE(create_time), event_type
+        ORDER BY date ASC
+    </select>
+
+    <!-- 事件类型分布 (饼图/环图) -->
+    <select id="countByType" resultType="java.util.HashMap">
+        SELECT event_type as eventType, COUNT(*) as count
+        FROM server_event
+        WHERE create_time BETWEEN #{startTime} AND #{endTime}
+        GROUP BY event_type
+        ORDER BY count DESC
+    </select>
+
+    <!-- 设备活跃排行 (柱状图) -->
+    <select id="deviceActivityRanking" resultType="java.util.HashMap">
+        SELECT device_code as deviceCode, COUNT(*) as count
+        FROM server_event
+        WHERE device_code IS NOT NULL
+        GROUP BY device_code
+        ORDER BY count DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="countByDeviceAndType" resultType="int">
+        SELECT COUNT(*) FROM server_event
+        WHERE device_code=#{deviceCode} AND event_type=#{eventType}
+          AND create_time BETWEEN #{startTime} AND #{endTime}
+    </select>
+</mapper>

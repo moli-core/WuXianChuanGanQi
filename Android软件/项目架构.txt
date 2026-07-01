@@ -1,0 +1,27 @@
+
+页面    接口    请求
+登录    POST /api/auth/login    {username, password}
+首页仪表盘    GET /api/data/dashboard    无
+天气    GET /api/weather/current    无
+设备控制    POST /api/device/control    {deviceCode:"led", action:1}
+一键全开    POST /api/device/all-on    无
+一键全关    POST /api/device/all-off    无
+AI 对话    POST /api/ai/chat    {question:"xxx"}
+语音上传    POST /api/voice/upload    multipart file
+设备列表    GET /api/aiot-device    无
+报表统计    GET /api/report/device-stats    无
+图表数据    GET /api/data/chart?hours=24    无
+告警日志    GET /api/log/alert    无
+WebSocket    ws://IP:8080/ws/device-state    自动接收推送
+
+三、统一返回格式
+
+{"code":200, "message":"success", "data":{...}}
+
+四、设备控制码
+设备    deviceCode
+绿灯    led
+红灯    ledRed
+黄灯    ledYellow
+蜂鸣器    buzzer
+action: 1=开 0=关

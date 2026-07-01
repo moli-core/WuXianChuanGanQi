@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wireless.mapper.ServerInstanceMapper">
+
+    <resultMap id="BaseResultMap" type="com.wireless.model.entity.ServerInstance">
+        <id column="id" property="id"/>
+        <result column="server_name" property="serverName"/>
+        <result column="listen_port" property="listenPort"/>
+        <result column="protocol" property="protocol"/>
+        <result column="server_type" property="serverType"/>
+        <result column="description" property="description"/>
+        <result column="status" property="status"/>
+        <result column="pid" property="pid"/>
+        <result column="log_path" property="logPath"/>
+        <result column="last_start" property="lastStart"/>
+        <result column="last_stop" property="lastStop"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO server_instance (server_name, listen_port, protocol, server_type, description)
+        VALUES (#{serverName}, #{listenPort}, #{protocol}, #{serverType}, #{description})
+    </insert>
+
+    <update id="update">
+        UPDATE server_instance
+        SET server_name=#{serverName}, listen_port=#{listenPort}, description=#{description}
+        WHERE id=#{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM server_instance WHERE id=#{id}
+    </delete>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM server_instance WHERE id=#{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM server_instance ORDER BY create_time DESC
+    </select>
+
+    <update id="updateStatus">
+        UPDATE server_instance
+        SET status=#{status}, update_time=NOW()
+        <if test="status == 'running'">, last_start=NOW()</if>
+        <if test="status == 'stopped'">, last_stop=NOW()</if>
+        WHERE id=#{id}
+    </update>
+</mapper>
