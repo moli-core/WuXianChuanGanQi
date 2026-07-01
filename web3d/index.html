@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字孪生 - 2室1厅1卫全屋IoT 3D可视化</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            margin: 0; overflow: hidden;
+            font-family: 'Microsoft YaHei', Segoe UI, sans-serif;
+            background: #0a0f17;
+        }
+
+        /* ===== 顶部导航 ===== */
+        .page-header {
+            position: absolute; top: 0; left: 0; width: 100%; height: 60px;
+            background: rgba(15,20,30,0.85); backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 30;
+            display: flex; align-items: center; padding: 0 30px;
+        }
+        .page-header h1 { color: #fff; font-size: 18px; font-weight: 400; }
+        .page-header .desc { color: #8cf; margin-left: 20px; font-size: 13px; }
+
+        /* 连接状态指示器 */
+        .conn-indicator {
+            margin-left: auto; display: flex; align-items: center; gap: 8px;
+            padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
+            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.12);
+        }
+        .conn-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #ff4444; box-shadow: 0 0 8px #ff4444;
+            transition: all 0.5s;
+        }
+        .conn-dot.sim { background: #ffaa00; box-shadow: 0 0 10px #ffaa00; }
+        .conn-dot.live { background: #00ff88; box-shadow: 0 0 10px #00ff88; }
+        .conn-text { color: #aaa; transition: color 0.5s; }
+        .conn-text.sim { color: #ffaa00; }
+        .conn-text.live { color: #00ff88; }
+
+        /* ===== 信息面板 ===== */
+        #info {
+            position: absolute; top: 75px; left: 20px;
+            background: rgba(0,0,0,0.7); color: white; padding: 15px 25px;
+            border-radius: 8px; pointer-events: none; z-index: 10;
+            backdrop-filter: blur(4px); border-left: 4px solid #ffaa00;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        #info h2 { margin: 0; font-size: 1.3rem; font-weight: 300; }
+        #info p { margin: 8px 0 0; font-size: 0.85rem; opacity: 0.8; line-height: 1.6; }
+
+        /* ===== 温湿度面板 ===== */
+        #temp-humi-panel {
+            position: absolute; top: 75px; right: 20px;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            border: 1px solid #22bb88; border-radius: 10px;
+            padding: 16px 20px; z-index: 20; min-width: 220px;
+            transition: border-color 0.8s;
+        }
+        #temp-humi-panel.warn-temp { border-color: #ff4444; }
+        #temp-humi-panel.warn-humi { border-color: #4488ff; }
+        #temp-humi-panel h3 {
+            color: #22dd99; font-size: 16px; margin-bottom: 12px; text-align: center;
+        }
+        .th-row { display: flex; justify-content: space-between; padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .th-row:last-child { border-bottom: none; }
+        .th-label { color: #ccc; font-size: 14px; }
+        .th-value { color: #fff; font-size: 15px; font-weight: bold; transition: color 0.5s; }
+        .th-value.temp-hot { color: #ff5555; }
+        .th-value.humi-wet { color: #5599ff; }
+
+        /* ===== 底部控制面板 ===== */
+        #control-panel {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 14px; background: rgba(30,30,40,0.8);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-radius: 60px;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6); z-index: 20;
+            flex-wrap: wrap; justify-content: center;
+        }
+        .device-btn {
+            background: rgba(60,60,80,0.6); border: none; color: #ddd;
+            padding: 9px 18px; border-radius: 40px; font-size: 0.9rem;
+            font-weight: 500; cursor: pointer; transition: all 0.25s ease;
+            display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px;
+            border: 1px solid transparent;
+        }
+        .device-btn.static-th { cursor: default; }
+        .device-btn.static-th:hover { transform: none; background: rgba(60,60,80,0.6); border-color: transparent; }
+        .device-btn:hover { transform: translateY(-3px); background: rgba(80,80,120,0.8); border-color: rgba(255,255,255,0.2); }
+        .device-btn .led {
+            display: inline-block; width: 13px; height: 13px; border-radius: 50%;
+            background: #444; transition: all 0.4s; box-shadow: 0 0 6px rgba(0,0,0,0.5);
+        }
+        .device-btn .led.on { background: #ffcc00; box-shadow: 0 0 16px #ffcc00; }
+        .device-btn .led.red-on { background: #ff3333; box-shadow: 0 0 16px #ff3333; }
+        .device-btn .led.yellow-on { background: #ffdd00; box-shadow: 0 0 16px #ffdd00; }
+        .device-btn .led.alarm { background: #ff2222; box-shadow: 0 0 22px #ff0000; animation: pulse 0.4s infinite alternate; }
+        .device-btn .led.off { background: #555; box-shadow: none; }
+        .device-btn .led.th-static { background: #22bb88; box-shadow: 0 0 10px #22bb88; }
+        @keyframes pulse {
+            0% { opacity: 0.5; transform: scale(0.85); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+        .status-badge { background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 30px; font-size: 0.78rem; color: #aaa; }
+
+        /* ===== 状态提示条 ===== */
+        #status-tip {
+            position: absolute; bottom: 125px; right: 30px;
+            background: rgba(0,0,0,0.6); color: #0ff; padding: 10px 18px;
+            border-radius: 30px; font-size: 0.85rem; border: 1px solid #0ff;
+            backdrop-filter: blur(4px); pointer-events: none; z-index: 15;
+            transition: color 0.5s, border-color 0.5s;
+        }
+
+        /* ===== 消息日志面板 ===== */
+        #msg-log-panel {
+            position: absolute; top: 220px; right: 20px;
+            background: rgba(0,0,0,0.65); border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1); z-index: 25;
+            width: 280px; max-height: 180px; overflow: hidden;
+            backdrop-filter: blur(4px); display: flex; flex-direction: column;
+        }
+        #msg-log-panel .log-header {
+            padding: 8px 14px; font-size: 12px; color: #88aacc;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        #msg-log-panel .log-header .log-clear {
+            cursor: pointer; color: #ff8866; font-size: 11px;
+            background: none; border: none; padding: 2px 8px; border-radius: 10px;
+        }
+        #msg-log-panel .log-header .log-clear:hover { background: rgba(255,100,50,0.2); }
+        #msg-log-list {
+            overflow-y: auto; padding: 6px 12px; flex: 1;
+            font-size: 11px; font-family: 'Consolas', 'Courier New', monospace;
+            color: #aaddaa; line-height: 1.7; max-height: 140px;
+        }
+        #msg-log-list .log-entry { border-bottom: 1px solid rgba(255,255,255,0.04); padding: 3px 0; word-break: break-all; }
+        #msg-log-list .log-entry .ts { color: #889999; margin-right: 6px; }
+        #msg-log-list .log-entry .kw { color: #ffaa44; }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 768px) {
+            #control-panel { gap: 8px; padding: 10px 12px; width: 94%; border-radius: 30px; bottom: 12px; }
+            .device-btn { padding: 5px 10px; font-size: 0.75rem; }
+            #info { top: 65px; left: 10px; padding: 10px 14px; }
+            #temp-humi-panel { top: 180px; right: 10px; min-width: 160px; padding: 10px 14px; }
+            #msg-log-panel { top: 340px; right: 10px; width: 200px; max-height: 120px; }
+            #status-tip { bottom: 100px; right: 10px; font-size: 0.75rem; }
+            .page-header { height: 50px; padding: 0 15px; }
+            .page-header h1 { font-size: 15px; }
+            .page-header .desc { display: none; }
+            .conn-indicator { padding: 4px 10px; font-size: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== 顶部导航条 ========== -->
+<div class="page-header">
+    <h1>🏠 数字孪生可视化模块 - 全屋IoT 3D监控</h1>
+    <span class="desc">华为云IoTDA | ESP32 | 人体感应/三色LED/蜂鸣器/温湿度实时渲染</span>
+    <div class="conn-indicator" id="conn-indicator" title="连接状态">
+        <span class="conn-dot" id="conn-dot"></span>
+        <span class="conn-text" id="conn-text">等待连接</span>
+    </div>
+</div>
+
+<!-- ========== 信息面板 ========== -->
+<div id="info">
+    <h2>🏠 2室1厅1卫+入户 数字孪生户型</h2>
+    <p>1. 左键拖拽旋转 | 滚轮缩放 | 右键平移<br>
+       2. 底部按钮手动控制设备状态<br>
+       3. 后端调用 DigitalTwin.updateFromHardware(json) 推送实时数据<br>
+       4. 支持华为云IoTDA标准 services/properties 物模型格式</p>
+</div>
+
+<!-- ========== 温湿度面板 ========== -->
+<div id="temp-humi-panel">
+    <h3>🌡️ 客厅温湿度实时监控</h3>
+    <div class="th-row">
+        <span class="th-label">当前温度：</span>
+        <span class="th-value" id="temp-val">25.0 ℃</span>
+    </div>
+    <div class="th-row">
+        <span class="th-label">当前湿度：</span>
+        <span class="th-value" id="humi-val">50.0 %RH</span>
+    </div>
+</div>
+
+<!-- ========== 实时消息日志 ========== -->
+<div id="msg-log-panel">
+    <div class="log-header">
+        <span>📡 硬件报文日志</span>
+        <button class="log-clear" onclick="document.getElementById('msg-log-list').innerHTML=''">清空</button>
+    </div>
+    <div id="msg-log-list"></div>
+</div>
+
+<!-- ========== 状态提示条 ========== -->
+<div id="status-tip">✨ 页面就绪，等待后端接口调用 &middot; 控制台可调 DigitalTwin API</div>
+
+<!-- ========== 设备控制面板 ========== -->
+<div id="control-panel">
+    <button id="btn-body-sensor" class="device-btn">
+        <span>🚪人体感应 Status_body</span>
+        <span class="led off" id="led-body-sensor"></span>
+        <span class="status-badge" id="status-body-sensor">无人</span>
+    </button>
+    <button id="btn-beeper" class="device-btn">
+        <span>🔔蜂鸣器 Status_beeper</span>
+        <span class="led off" id="led-beeper"></span>
+        <span class="status-badge" id="status-beeper">安全</span>
+    </button>
+    <button id="btn-led-green" class="device-btn">
+        <span>💚客厅灯 Status_LED</span>
+        <span class="led off" id="led-led-green"></span>
+        <span class="status-badge" id="status-led-green">关</span>
+    </button>
+    <button id="btn-led-red" class="device-btn">
+        <span>❤️主卧灯 Status_ledRed</span>
+        <span class="led off" id="led-led-red"></span>
+        <span class="status-badge" id="status-led-red">关</span>
+    </button>
+    <button id="btn-led-yellow" class="device-btn">
+        <span>💛卫生间灯 Status_ledYellow</span>
+        <span class="led off" id="led-led-yellow"></span>
+        <span class="status-badge" id="status-led-yellow">关</span>
+    </button>
+    <div class="device-btn static-th">
+        <span>🌡️温湿度 Data_temp/humi</span>
+        <span class="led th-static"></span>
+        <span class="status-badge" id="status-temp-humi">25.0℃ / 50.0%RH</span>
+    </div>
+</div>
+
+<!-- ========== Three.js 导入映射（本地版本） ========== -->
+<script type="importmap">
+{
+    "imports": {
+        "three": "./node_modules/three/build/three.module.js",
+        "three/addons/": "./node_modules/three/examples/jsm/"
+    }
+}
+</script>
+
+<!-- ========== 3D主渲染逻辑 ========== -->
+<script type="module" src="./main.js"></script>
+
+<!-- ========== 全局DigitalTwin接口（后端直接调用） ========== -->
+<script>
+/**
+ * DigitalTwin 全局接口 v2.0
+ *
+ * 接受华为云IoTDA标准物模型格式 {services:[{service_id:"Esp32", properties:{...}}]}
+ *
+ * 硬件字段 ↔ 内部设备映射：
+ *   Status_LED → 客厅绿灯    Status_ledRed → 主卧红灯
+ *   Status_ledYellow → 卫生间黄灯  Status_beeper → 蜂鸣器
+ *   Status_body → 人体感应    Data_temp → 温度   Data_humi → 湿度
+ */
+;(function() {
+    'use strict';
+
+    // ==================== 字段映射表 ====================
+    var FIELD_MAP = {
+        'Status_LED':       { dev: 'ledGreen',   type: 'bool' },
+        'Status_ledRed':    { dev: 'ledRed',     type: 'bool' },
+        'Status_ledYellow': { dev: 'ledYellow',  type: 'bool' },
+        'Status_beeper':    { dev: 'beeper',     type: 'bool' },
+        'Status_body':      { dev: 'bodySensor', type: 'bool' },
+        'Data_temp':        { dev: 'temp',       type: 'num'  },
+        'Data_humi':        { dev: 'humi',       type: 'num'  }
+    };
+
+    // ==================== 消息日志 ====================
+    function appendLog(properties) {
+        var list = document.getElementById('msg-log-list');
+        if (!list) return;
+        var now = new Date().toLocaleTimeString();
+        var brief = [];
+        for (var k in properties) {
+            if (properties.hasOwnProperty(k)) {
+                brief.push('<span class="kw">' + k + '</span>=' + properties[k]);
+            }
+        }
+        var entry = document.createElement('div');
+        entry.className = 'log-entry';
+        entry.innerHTML = '<span class="ts">' + now + '</span>' + brief.join(' ');
+        list.insertBefore(entry, list.firstChild);
+        // 最多保留 50 条
+        while (list.children.length > 50) list.removeChild(list.lastChild);
+    }
+
+    // ==================== 连接状态指示 ====================
+    function setConnectionStatus(mode) {
+        var dot = document.getElementById('conn-dot');
+        var text = document.getElementById('conn-text');
+        if (!dot || !text) return;
+        dot.className = 'conn-dot ' + mode;
+        text.className = 'conn-text ' + mode;
+        var labels = { live: '🟢 后端已连接', off: '🔴 等待连接' };
+        text.textContent = labels[mode] || '等待连接';
+    }
+
+
+    // ==================== 公开 API ====================
+    window.DigitalTwin = {
+        FIELD_MAP: FIELD_MAP,
+
+        /**
+         * 【核心】接收华为云IoTDA标准硬件上报JSON，自动解析并驱动3D+UI
+         * @param {Object} json - 完整上报体 {services:[{service_id:"Esp32", properties:{...}}]}
+         *
+         * 用法示例：
+         *   DigitalTwin.updateFromHardware({
+         *     services: [{ service_id: "Esp32", properties: { Status_LED: true, Data_temp: 26, ... } }]
+         *   })
+         */
+        updateFromHardware: function(json) {
+            if (!json || !json.services) {
+                console.warn('[DigitalTwin] 无效报文格式，需要 {services:[...]}');
+                return false;
+            }
+            var svc = json.services[0];
+            if (!svc || svc.service_id !== 'Esp32' || !svc.properties) {
+                // 尝试找到 service_id="Esp32" 的服务
+                svc = null;
+                for (var i = 0; i < json.services.length; i++) {
+                    if (json.services[i].service_id === 'Esp32') {
+                        svc = json.services[i];
+                        break;
+                    }
+                }
+                if (!svc) {
+                    console.warn('[DigitalTwin] 未找到 service_id="Esp32" 的服务');
+                    return false;
+                }
+            }
+
+            var props = svc.properties;
+            appendLog(props);
+
+            // 解析每个属性
+            for (var field in props) {
+                if (!props.hasOwnProperty(field)) continue;
+                var mapping = FIELD_MAP[field];
+                if (!mapping) {
+                    console.warn('[DigitalTwin] 未识别的字段：' + field);
+                    continue;
+                }
+                var value = props[field];
+                if (mapping.type === 'bool') {
+                    if (value === null || value === undefined) continue;  // 未推送的字段不覆盖
+                    if (window.setDeviceState) {
+                        window.setDeviceState(mapping.dev, Boolean(value));
+                    }
+                } else if (mapping.type === 'num') {
+                    // 数值型（温湿度）：各自独立应用，利用当前缓存的值补全
+                    if (field === 'Data_temp') {
+                        if (window.setTempHumi) {
+                            var h = (window.currentHumi !== undefined) ? Number(window.currentHumi) : 50;
+                            window.setTempHumi(Number(value), h);
+                        }
+                    } else if (field === 'Data_humi') {
+                        if (window.setTempHumi) {
+                            var t2 = (window.currentTemp !== undefined) ? Number(window.currentTemp) : 25;
+                            window.setTempHumi(t2, Number(value));
+                        }
+                    }
+                }
+            }
+
+            // 联动规则：Status_body变化后触发评估
+            if (window.evaluateLinkageRules) {
+                window.evaluateLinkageRules();
+            }
+
+            setConnectionStatus('live');
+            return true;
+        },
+
+        /**
+         * 【向后兼容】设置单个设备状态
+         * @param {string} deviceId - ledGreen|ledRed|ledYellow|beeper|bodySensor
+         * @param {boolean} state
+         */
+        setDevice: function(deviceId, state) {
+            if (window.setDeviceState) {
+                window.setDeviceState(deviceId, Boolean(state));
+            }
+        },
+
+        /**
+         * 【向后兼容】设置温湿度环境数据
+         * @param {number} temp - 温度 ℃
+         * @param {number} humi - 湿度 %
+         */
+        setEnvData: function(temp, humi) {
+            if (window.setTempHumi) {
+                window.setTempHumi(Number(temp), Number(humi));
+            }
+        },
+
+        /**
+         * 获取当前全量设备状态（与硬件上报格式一致）
+         * @returns {Object} {services:[{service_id:"Esp32", properties:{...}}]}
+         */
+        getFullDeviceStatus: function() {
+            if (!window.deviceMap) return null;
+            return {
+                services: [{
+                    service_id: 'Esp32',
+                    properties: {
+                        Status_LED:       window.deviceMap.ledGreen  ? window.deviceMap.ledGreen.state  : false,
+                        Status_ledRed:    window.deviceMap.ledRed    ? window.deviceMap.ledRed.state    : false,
+                        Status_ledYellow: window.deviceMap.ledYellow ? window.deviceMap.ledYellow.state : false,
+                        Status_beeper:    window.deviceMap.beeper    ? window.deviceMap.beeper.alarm    : false,
+                        Status_body:      window.deviceMap.bodySensor ? window.deviceMap.bodySensor.state : false,
+                        Data_temp:        window.currentTemp !== undefined ? Number(window.currentTemp) : 25,
+                        Data_humi:        window.currentHumi !== undefined ? Number(window.currentHumi) : 50
+                    }
+                }]
+            };
+        },
+    };
+
+    console.log('🏠 DigitalTwin API v2.0 就绪');
+    console.log('  ✓ updateFromHardware(json)  — 接收华为云IoTDA标准报文');
+    console.log('  ✓ setDevice(id, state)      — 单设备控制');
+    console.log('  ✓ setEnvData(temp, humi)    — 温湿度设置');
+    console.log('  ✓ getFullDeviceStatus()     — 获取全量状态');
+
+    // ==================== 连接后端 WebSocket 实时接收 ESP32 数据 ====================
+    var WS_URL = window.location.hostname
+        ? 'ws://' + window.location.hostname + ':8080/ws/device-state'
+        : 'ws://192.168.198.114:8080/ws/device-state';
+    var ws = null;
+    var wsReconnectTimer = null;
+
+    function connectWebSocket() {
+        if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+
+        console.log('[WebSocket] 连接中: ' + WS_URL);
+        ws = new WebSocket(WS_URL);
+
+        ws.onopen = function() {
+            console.log('[WebSocket] 已连接后端');
+            setConnectionStatus('live');
+            if (wsReconnectTimer) { clearTimeout(wsReconnectTimer); wsReconnectTimer = null; }
+
+            // 首次连接时拉取当前硬件状态
+            fetch(WS_URL.replace('ws://', 'http://').replace('/ws/device-state', '/api/data/dashboard'))
+                .then(r => r.json()).then(d => {
+                    if (d.code === 200 && d.data) {
+                        var dd = d.data;
+                        var props = {
+                            Status_LED: dd.deviceStatus ? (dd.deviceStatus.led === 1) : false,
+                            Status_ledRed: dd.deviceStatus ? (dd.deviceStatus.ledRed === 1) : false,
+                            Status_ledYellow: dd.deviceStatus ? (dd.deviceStatus.ledYellow === 1) : false,
+                            Status_beeper: dd.deviceStatus ? (dd.deviceStatus.buzzer === 1) : false,
+                            Data_temp: dd.currentTemp || 25,
+                            Data_humi: dd.currentHumidity || 50
+                        };
+                        DigitalTwin.updateFromHardware({services:[{service_id:'Esp32',properties:props}]});
+                        console.log('[初始状态] 已加载', props);
+                    }
+                }).catch(e => console.log('[初始状态] 加载失败'));
+        };
+
+        ws.onmessage = function(event) {
+            var data = JSON.parse(event.data);
+            DigitalTwin.updateFromHardware({
+                services: [{
+                    service_id: 'Esp32',
+                    properties: {
+                        Status_LED:       data.Status_LED !== undefined ? data.Status_LED : null,
+                        Status_ledRed:    data.Status_ledRed !== undefined ? data.Status_ledRed : null,
+                        Status_ledYellow: data.Status_ledYellow !== undefined ? data.Status_ledYellow : null,
+                        Status_beeper:    data.Status_beeper !== undefined ? data.Status_beeper : null,
+                        Status_body:      data.Status_body !== undefined ? data.Status_body : null,
+                        Data_temp:        data.Data_temp || null,
+                        Data_humi:        data.Data_humi || null
+                    }
+                }]
+            });
+        };
+
+        ws.onclose = function() {
+            console.log('[WebSocket] 断开, 3秒后重连');
+            setConnectionStatus('off');
+            wsReconnectTimer = setTimeout(connectWebSocket, 3000);
+        };
+
+        ws.onerror = function() {
+            console.log('[WebSocket] 连接失败');
+            ws.close();
+        };
+    }
+
+    connectWebSocket();
+})();
+</script>
+
+</body>
+</html>

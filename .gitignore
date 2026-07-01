@@ -1,0 +1,15 @@
+# Maven
+back_end/target/
+*.jar
+
+# Node
+web3d/node_modules/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wireless.mapper.AlertLogMapper">
+
+    <resultMap id="BaseResultMap" type="com.wireless.model.entity.AlertLog">
+        <id column="id" property="id"/>
+        <result column="alert_type" property="alertType"/>
+        <result column="alert_level" property="alertLevel"/>
+        <result column="content" property="content"/>
+        <result column="env_value" property="envValue"/>
+        <result column="is_handled" property="isHandled"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.wireless.model.entity.AlertLog"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO alert_log (alert_type, alert_level, content, env_value)
+        VALUES (#{alertType}, #{alertLevel}, #{content}, #{envValue})
+    </insert>
+
+    <select id="selectByType" resultMap="BaseResultMap">
+        SELECT * FROM alert_log
+        WHERE alert_type = #{alertType}
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByTimeRange" resultMap="BaseResultMap">
+        SELECT * FROM alert_log
+        WHERE create_time BETWEEN #{startTime} AND #{endTime}
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="countToday" resultType="int">
+        SELECT COUNT(*)
+        FROM alert_log
+        WHERE create_time BETWEEN #{startOfDay} AND #{endOfDay}
+    </select>
+
+    <update id="markHandled">
+        UPDATE alert_log SET is_handled = 1 WHERE id = #{id}
+    </update>
+
+</mapper>

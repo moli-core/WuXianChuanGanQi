@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wireless.mapper.EnvDataMapper">
+
+    <resultMap id="BaseResultMap" type="com.wireless.model.entity.EnvData">
+        <id column="id" property="id"/>
+        <result column="device_code" property="deviceCode"/>
+        <result column="temperature" property="temperature"/>
+        <result column="humidity" property="humidity"/>
+        <result column="smoke_level" property="smokeLevel"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.wireless.model.entity.EnvData"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO env_data (device_code, temperature, humidity, smoke_level)
+        VALUES (#{deviceCode}, #{temperature}, #{humidity}, #{smokeLevel})
+    </insert>
+
+    <select id="selectLatest" resultMap="BaseResultMap">
+        SELECT * FROM env_data ORDER BY create_time DESC LIMIT 1
+    </select>
+
+    <select id="selectByTimeRange" resultMap="BaseResultMap">
+        SELECT * FROM env_data
+        WHERE create_time BETWEEN #{startTime} AND #{endTime}
+        ORDER BY create_time ASC
+    </select>
+
+    <select id="selectRecentHours" resultMap="BaseResultMap">
+        SELECT * FROM env_data
+        WHERE create_time >= DATE_SUB(NOW(), INTERVAL #{hours} HOUR)
+        ORDER BY create_time ASC
+    </select>
+
+    <select id="selectAvgTemp" resultType="java.math.BigDecimal">
+        SELECT ROUND(AVG(temperature), 2)
+        FROM env_data
+        WHERE create_time BETWEEN #{startTime} AND #{endTime}
+    </select>
+
+</mapper>

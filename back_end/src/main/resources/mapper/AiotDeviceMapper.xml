@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wireless.mapper.AiotDeviceMapper">
+
+    <resultMap id="BaseResultMap" type="com.wireless.model.entity.AiotDevice">
+        <id column="id" property="id"/>
+        <result column="device_code" property="deviceCode"/>
+        <result column="device_name" property="deviceName"/>
+        <result column="device_type" property="deviceType"/>
+        <result column="ip_address" property="ipAddress"/>
+        <result column="mac_address" property="macAddress"/>
+        <result column="mqtt_topic" property="mqttTopic"/>
+        <result column="firmware_version" property="firmwareVersion"/>
+        <result column="sensor_list" property="sensorList"/>
+        <result column="led_status" property="ledStatus"/>
+        <result column="mode" property="mode"/>
+        <result column="light_sensor" property="lightSensor"/>
+        <result column="pir_status" property="pirStatus"/>
+        <result column="screen_status" property="screenStatus"/>
+        <result column="wifi_rssi" property="wifiRssi"/>
+        <result column="tcp_connected" property="tcpConnected"/>
+        <result column="online_status" property="onlineStatus"/>
+        <result column="last_report_time" property="lastReportTime"/>
+        <result column="register_source" property="registerSource"/>
+        <result column="remarks" property="remarks"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO aiot_device (device_code, device_name, device_type, ip_address, mac_address,
+            mqtt_topic, firmware_version, sensor_list, remarks)
+        VALUES (#{deviceCode}, #{deviceName}, #{deviceType}, #{ipAddress}, #{macAddress},
+            #{mqttTopic}, #{firmwareVersion}, #{sensorList}, #{remarks})
+    </insert>
+
+    <update id="update">
+        UPDATE aiot_device
+        SET device_name=#{deviceName}, device_type=#{deviceType}, ip_address=#{ipAddress},
+            mac_address=#{macAddress}, mqtt_topic=#{mqttTopic}, sensor_list=#{sensorList},
+            remarks=#{remarks}
+        WHERE id=#{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM aiot_device WHERE id=#{id}
+    </delete>
+
+    <select id="selectByDeviceCode" resultMap="BaseResultMap">
+        SELECT * FROM aiot_device WHERE device_code=#{deviceCode}
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM aiot_device WHERE id=#{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM aiot_device WHERE 1=1
+        <if test="keyword != null and keyword != ''">
+            AND (device_code LIKE CONCAT('%',#{keyword},'%') OR device_name LIKE CONCAT('%',#{keyword},'%'))
+        </if>
+        <if test="deviceType != null and deviceType != ''">
+            AND device_type=#{deviceType}
+        </if>
+        <if test="onlineStatus != null">
+            AND online_status=#{onlineStatus}
+        </if>
+        ORDER BY update_time DESC
+    </select>
+
+    <insert id="upsertOnReport">
+        INSERT INTO aiot_device (device_code, device_name, ip_address, mac_address, mqtt_topic,
+            led_status, mode, light_sensor, pir_status, screen_status, wifi_rssi, tcp_connected,
+            online_status, last_report_time, register_source)
+        VALUES (#{deviceCode}, #{deviceName}, #{ipAddress}, #{macAddress}, #{mqttTopic},
+            #{ledStatus}, #{mode}, #{lightSensor}, #{pirStatus}, #{screenStatus}, #{wifiRssi}, #{tcpConnected},
+            1, NOW(), 'auto')
+        ON DUPLICATE KEY UPDATE
+            ip_address=VALUES(ip_address), led_status=VALUES(led_status), mode=VALUES(mode),
+            light_sensor=VALUES(light_sensor), pir_status=VALUES(pir_status),
+            screen_status=VALUES(screen_status), wifi_rssi=VALUES(wifi_rssi),
+            tcp_connected=VALUES(tcp_connected), online_status=1,
+            last_report_time=NOW(), update_time=NOW()
+    </insert>
+
+    <update id="updateReportState">
+        UPDATE aiot_device
+        SET led_status=#{ledStatus}, mode=#{mode}, light_sensor=#{lightSensor},
+            pir_status=#{pirStatus}, screen_status=#{screenStatus},
+            wifi_rssi=#{wifiRssi}, tcp_connected=#{tcpConnected},
+            online_status=1, last_report_time=NOW(), update_time=NOW()
+        WHERE device_code=#{deviceCode}
+    </update>
+
+    <select id="countAll" resultType="int">
+        SELECT COUNT(*) FROM aiot_device
+    </select>
+
+    <select id="countOnline" resultType="int">
+        SELECT COUNT(*) FROM aiot_device WHERE online_status=1
+    </select>
+
+    <update id="updateOnlineStatus">
+        UPDATE aiot_device SET online_status=#{onlineStatus}, update_time=NOW()
+        WHERE device_code=#{deviceCode}
+    </update>
+</mapper>

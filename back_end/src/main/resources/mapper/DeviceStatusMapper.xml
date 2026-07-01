@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wireless.mapper.DeviceStatusMapper">
+
+    <resultMap id="BaseResultMap" type="com.wireless.model.entity.DeviceStatus">
+        <id column="id" property="id"/>
+        <result column="device_code" property="deviceCode"/>
+        <result column="device_name" property="deviceName"/>
+        <result column="status" property="status"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT id, device_code, device_name, status, update_time
+        FROM device_status
+    </select>
+
+    <select id="selectByDeviceCode" resultMap="BaseResultMap">
+        SELECT id, device_code, device_name, status, update_time
+        FROM device_status
+        WHERE device_code = #{deviceCode}
+    </select>
+
+    <update id="updateStatus">
+        UPDATE device_status
+        SET status = #{status}, update_time = NOW()
+        WHERE device_code = #{deviceCode}
+    </update>
+
+    <insert id="insertIfNotExists">
+        INSERT IGNORE INTO device_status (device_code, device_name, status)
+        VALUES (#{deviceCode}, #{deviceName}, #{status})
+    </insert>
+
+</mapper>
